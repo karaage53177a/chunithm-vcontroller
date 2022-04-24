@@ -96,20 +96,33 @@ void chuni_io_jvs_read_coin_counter(uint16_t* out)
     *out = chuni_coins;
 }
 
-void chuni_io_jvs_poll(uint8_t* opbtn, uint8_t* beams)
-{
-    if (chuni_test_pending) {
-        *opbtn |= 0x01;
-        chuni_test_pending = false;
+void chuni_io_jvs_poll(uint8_t* opbtn, uint8_t* beams) {
+    //if (chuni_test_pending) {
+    //    *opbtn |= 0x01;
+    //    chuni_test_pending = false;
+    //}
+
+    //if (chuni_service_pending) {
+    //    *opbtn |= 0x02;
+    //    chuni_service_pending = false;
+    //}
+
+    if (GetAsyncKeyState(chuni_io_cfg.vk_test)) {
+        *opbtn |= 0x01; /* Test */
     }
 
-    if (chuni_service_pending) {
-        *opbtn |= 0x02;
-        chuni_service_pending = false;
-
+    if (GetAsyncKeyState(chuni_io_cfg.vk_service)) {
+        *opbtn |= 0x02; /* Service */
     }
 
-    *beams = chuni_ir_sensor_map;
+    //*beams = chuni_ir_sensor_map;
+
+    size_t i;
+    for (i = 0; i < 6; i++) {
+        if (GetAsyncKeyState(chuni_io_cfg.vk_ir[i])) {
+            *beams |= (1 << i);
+        }
+    }
 }
 
 void chuni_io_jvs_set_coin_blocker(bool open)
