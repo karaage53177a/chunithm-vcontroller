@@ -27,8 +27,7 @@ static bool remote_exist = false;
 static uint8_t chuni_sliders[32];
 static struct chuni_io_config chuni_io_cfg;
 
-HRESULT chuni_io_jvs_init(void)
-{
+HRESULT chuni_io_jvs_init(void) {
     // alloc console for debug output
     AllocConsole();
     FILE* fp;
@@ -84,8 +83,7 @@ HRESULT chuni_io_jvs_init(void)
     return S_OK;
 }
 
-void chuni_io_jvs_read_coin_counter(uint16_t* out)
-{
+void chuni_io_jvs_read_coin_counter(uint16_t* out) {
     if (out == NULL) {
         return;
     }
@@ -97,26 +95,23 @@ void chuni_io_jvs_read_coin_counter(uint16_t* out)
 }
 
 void chuni_io_jvs_poll(uint8_t* opbtn, uint8_t* beams) {
-    //if (chuni_test_pending) {
-    //    *opbtn |= 0x01;
-    //    chuni_test_pending = false;
-    //}
-
-    //if (chuni_service_pending) {
-    //    *opbtn |= 0x02;
-    //    chuni_service_pending = false;
-    //}
-
+    //Test
     if (GetAsyncKeyState(chuni_io_cfg.vk_test)) {
-        *opbtn |= 0x01; /* Test */
+        log_info("setting cabinet_test.\n");
+        *opbtn |= 0x01;
+        chuni_test_pending = false;
     }
-
+    //Service
     if (GetAsyncKeyState(chuni_io_cfg.vk_service)) {
-        *opbtn |= 0x02; /* Service */
+        log_info("setting cabinet_service.\n");
+        *opbtn |= 0x02;
+        chuni_service_pending = false;
     }
-
-    //*beams = chuni_ir_sensor_map;
-
+    //Coin
+    if (GetAsyncKeyState(chuni_io_cfg.vk_coin)) {
+        log_info("adding coin.\n");
+    }
+    //IR
     size_t i;
     for (i = 0; i < 6; i++) {
         if (GetAsyncKeyState(chuni_io_cfg.vk_ir[i])) {
@@ -125,21 +120,17 @@ void chuni_io_jvs_poll(uint8_t* opbtn, uint8_t* beams) {
     }
 }
 
-void chuni_io_jvs_set_coin_blocker(bool open)
-{
+void chuni_io_jvs_set_coin_blocker(bool open) {
     if (open) log_info("coin blocker disabled");
     else log_info("coin blocker enabled.");
-    
 }
 
-HRESULT chuni_io_slider_init(void)
-{
+HRESULT chuni_io_slider_init(void) {
     log_info("init slider...\n");
     return S_OK;
 }
 
-void chuni_io_slider_start(chuni_io_slider_callback_t callback)
-{
+void chuni_io_slider_start(chuni_io_slider_callback_t callback) {
     log_info("starting slider...\n");
     if (chuni_io_slider_thread != NULL) {
         return;
@@ -154,8 +145,7 @@ void chuni_io_slider_start(chuni_io_slider_callback_t callback)
         NULL);
 }
 
-void chuni_io_slider_stop(void)
-{
+void chuni_io_slider_stop(void) {
     log_info("stopping slider...\n");
     if (chuni_io_slider_thread == NULL) {
         return;
@@ -169,8 +159,7 @@ void chuni_io_slider_stop(void)
     chuni_io_slider_stop_flag = false;
 }
 
-void chuni_io_slider_set_leds(const uint8_t* rgb)
-{
+void chuni_io_slider_set_leds(const uint8_t* rgb) {
     static uint8_t prev_rgb_status[96];
     static chuni_msg_t message;
     message.src = SRC_GAME;
@@ -204,6 +193,7 @@ static void chuni_io_ir(uint8_t sensor, bool set) {
     else chuni_ir_sensor_map &= ~(1 << sensor);
 }
 
+//vccontroller用
 static unsigned int __stdcall chuni_io_network_thread_proc(void* ctx) {
     log_info("spinning up network event handler...\n");
 
