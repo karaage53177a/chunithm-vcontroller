@@ -43,7 +43,7 @@ HRESULT chuni_io_jvs_init(void)
     log_info("┃┃╋┏┓┃┏━┓┃┃┃╋┃┃┃┃┗┓┃┃╋┃┃╋╋┃┃╋┃┃╋┃┃\n");
     log_info("┃┗━┛┃┃┃╋┃┃┃┗━┛┃┃┃╋┃┃┃┏┫┣┓┏┫┣┓┃┗━┛┃\n");
     log_info("┗━━━┛┗┛╋┗┛┗━━━┛┗┛╋┗━┛┗━━┛┗━━┛┗━━━┛\n");
-    log_info("Build 2022042400\n");
+    log_info("Ver 0.3.0 Build 2022042400\n");
 
     chuni_io_config_load(&chuni_io_cfg, L".\\segatools.ini");
 
@@ -228,16 +228,16 @@ static unsigned int __stdcall chuni_io_network_thread_proc(void* ctx) {
                 //log_debug("slider_press at %d.\n", msg->target);
                 if (msg->target >= 16) log_error("invalid slider value %d in SLIDER_PRESS.\n", msg->target);
                 else {
-                    chuni_sliders[(msg->target) * 2] = 128;
-                    chuni_sliders[(msg->target) * 2 + 1] = 128;
+                    //chuni_sliders[(msg->target) * 2] = 128;
+                    //chuni_sliders[(msg->target) * 2 + 1] = 128;
                 }
                 break;
             case SLIDER_RELEASE:
                 //log_debug("slider released on %d.\n", msg->target);
                 if (msg->target >= 16) log_error("invalid slider value %d in SLIDER_RELEASE.\n", msg->target);
                 else {
-                    chuni_sliders[(msg->target) * 2] = 0;
-                    chuni_sliders[(msg->target) * 2 + 1] = 0;
+                    //chuni_sliders[(msg->target) * 2] = 0;
+                    //chuni_sliders[(msg->target) * 2 + 1] = 0;
                 }
                 break;
             case CABINET_TEST:
@@ -278,6 +278,15 @@ static unsigned int __stdcall chuni_io_slider_thread_proc(void* ctx) {
     callback = (chuni_io_slider_callback_t) ctx;
 
     while (!chuni_io_slider_stop_flag) {
+        for (i = 0; i < _countof(chuni_sliders); i++) {
+            if (GetAsyncKeyState(chuni_io_cfg.vk_cell[i]) & 0x8000) {
+                chuni_sliders[i] = 128;
+            }
+            else {
+                chuni_sliders[i] = 0;
+            }
+        }
+
         callback(chuni_sliders);
         Sleep(1);
     }
