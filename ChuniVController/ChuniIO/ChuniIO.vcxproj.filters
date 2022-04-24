@@ -24,9 +24,15 @@
     <ClInclude Include="log.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="chuniio.cc">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="config.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

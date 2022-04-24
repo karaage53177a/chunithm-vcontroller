@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <fcntl.h>
 #include <io.h>
+#include "config.h"
 #include "chuniio.h"
 #include "log.h"
 #pragma comment(lib,"ws2_32.lib")
@@ -24,6 +25,7 @@ static USHORT chuni_port = 24864; // CHUNI on dialpad
 static struct sockaddr_in remote;
 static bool remote_exist = false;
 static uint8_t chuni_sliders[32];
+static struct chuni_io_config chuni_io_cfg;
 
 HRESULT chuni_io_jvs_init(void)
 {
@@ -33,6 +35,17 @@ HRESULT chuni_io_jvs_init(void)
     freopen_s(&fp, "CONOUT$", "w", stdout);
 
     log_info("allocated debug console.\n");
+
+
+    log_info("┏━━━┓┏┓╋┏┓┏┓╋┏┓┏━┓╋┏┓┏━━┓┏━━┓┏━━━┓\n");
+    log_info("┃┏━┓┃┃┃╋┃┃┃┃╋┃┃┃┃┗┓┃┃┗┫┣┛┗┫┣┛┃┏━┓┃\n");
+    log_info("┃┃╋┗┛┃┗━┛┃┃┃╋┃┃┃┏┓┗┛┃╋┃┃╋╋┃┃╋┃┃╋┃┃\n");
+    log_info("┃┃╋┏┓┃┏━┓┃┃┃╋┃┃┃┃┗┓┃┃╋┃┃╋╋┃┃╋┃┃╋┃┃\n");
+    log_info("┃┗━┛┃┃┃╋┃┃┃┗━┛┃┃┃╋┃┃┃┏┫┣┓┏┫┣┓┃┗━┛┃\n");
+    log_info("┗━━━┛┗┛╋┗┛┗━━━┛┗┛╋┗━┛┗━━┛┗━━┛┗━━━┛\n");
+    log_info("Build 2022042400\n");
+
+    chuni_io_config_load(&chuni_io_cfg, L".\\segatools.ini");
 
     struct sockaddr_in local;
     memset(&local, 0, sizeof(struct sockaddr_in));
