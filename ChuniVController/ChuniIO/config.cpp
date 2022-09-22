@@ -37,6 +37,7 @@ void chuni_io_config_load(struct chuni_io_config* cfg, const wchar_t* filename) 
     cfg->vk_ir[4] = GetPrivateProfileIntW(L"io3", L"ir5", VK_OEM_4, filename); //5
     cfg->vk_ir[5] = GetPrivateProfileIntW(L"io3", L"ir6", VK_OEM_6, filename); //6
 
+    cfg->SDHD = GetPrivateProfileIntW(L"ver", L"SDHD", 0, filename); //SDHDƒtƒ‰ƒO
 
     for (i = 0; i < 32; i++) {
         swprintf_s(key, _countof(key), L"cell%i", i + 1);

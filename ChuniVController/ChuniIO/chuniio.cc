@@ -42,12 +42,13 @@ HRESULT chuni_io_jvs_init(void) {
     log_info("┃┃╋┏┓┃┏━┓┃┃┃╋┃┃┃┃┗┓┃┃╋┃┃╋╋┃┃╋┃┃╋┃┃\n");
     log_info("┃┗━┛┃┃┃╋┃┃┃┗━┛┃┃┃╋┃┃┃┏┫┣┓┏┫┣┓┃┗━┛┃\n");
     log_info("┗━━━┛┗┛╋┗┛┗━━━┛┗┛╋┗━┛┗━━┛┗━━┛┗━━━┛\n");
-    log_info("Ver 0.3.0 Build 2022042400\n");
+    log_info("Ver 0.3.1 Build 2022092300\n");
+    log_info("Customized by Karaage53177a\n");
 
     chuni_io_config_load(&chuni_io_cfg, L".\\segatools.ini");
 
-    struct sockaddr_in local;
-    memset(&local, 0, sizeof(struct sockaddr_in));
+    //struct sockaddr_in local;
+    //memset(&local, 0, sizeof(struct sockaddr_in));
 
     WSAData wsad;
     if (WSAStartup(MAKEWORD(2, 2), &wsad) != 0) {
@@ -55,30 +56,30 @@ HRESULT chuni_io_jvs_init(void) {
         return S_FALSE;
     }
 
-    chuni_socket = socket(AF_INET, SOCK_DGRAM, 0);
-    if (chuni_socket == INVALID_SOCKET) {
-        log_error("socket() failed.\n");
-        return S_FALSE;
-    }
+    //chuni_socket = socket(AF_INET, SOCK_DGRAM, 0);
+    //if (chuni_socket == INVALID_SOCKET) {
+    //    log_error("socket() failed.\n");
+    //    return S_FALSE;
+    //}
 
-    local.sin_addr.s_addr = INADDR_ANY; // TODO: make configurable
-    local.sin_family = AF_INET;
-    local.sin_port = htons(chuni_port);
+    //local.sin_addr.s_addr = INADDR_ANY; // TODO: make configurable
+    //local.sin_family = AF_INET;
+    //local.sin_port = htons(chuni_port);
 
-    if (bind(chuni_socket, (struct sockaddr*) & local, sizeof(struct sockaddr_in)) == SOCKET_ERROR) {
-        log_error("bind() failed.\n");
-        return S_FALSE;
-    }
+    //if (bind(chuni_socket, (struct sockaddr*) & local, sizeof(struct sockaddr_in)) == SOCKET_ERROR) {
+    //    log_error("bind() failed.\n");
+    //    return S_FALSE;
+    //}
 
-    (HANDLE)_beginthreadex(
-        NULL,
-        0,
-        chuni_io_network_thread_proc,
-        NULL,
-        0,
-        NULL);
+    //(HANDLE)_beginthreadex(
+    //    NULL,
+    //    0,
+    //    chuni_io_network_thread_proc,
+    //    NULL,
+    //    0,
+    //    NULL);
 
-    log_info("server socket initialization completed.\n");
+    //log_info("server socket initialization completed.\n");
 
     return S_OK;
 }
@@ -97,25 +98,27 @@ void chuni_io_jvs_read_coin_counter(uint16_t* out) {
 void chuni_io_jvs_poll(uint8_t* opbtn, uint8_t* beams) {
     //Test
     if (GetAsyncKeyState(chuni_io_cfg.vk_test)) {
-        log_info("setting cabinet_test.\n");
+        log_info("テストsw検出\n");
         *opbtn |= 0x01;
         chuni_test_pending = false;
     }
     //Service
     if (GetAsyncKeyState(chuni_io_cfg.vk_service)) {
-        log_info("setting cabinet_service.\n");
+        log_info("サービスSW検出\n");
         *opbtn |= 0x02;
         chuni_service_pending = false;
     }
     //Coin
     if (GetAsyncKeyState(chuni_io_cfg.vk_coin)) {
-        log_info("adding coin.\n");
+        log_info("コイン投入検出\n");
     }
     //IR
-    size_t i;
-    for (i = 0; i < 6; i++) {
+    for (size_t i = 0; i < 6; i++) {
         if (GetAsyncKeyState(chuni_io_cfg.vk_ir[i])) {
             *beams |= (1 << i);
+        }
+        else {
+            *beams &= ~(1 << i);
         }
     }
 }
@@ -126,12 +129,12 @@ void chuni_io_jvs_set_coin_blocker(bool open) {
 }
 
 HRESULT chuni_io_slider_init(void) {
-    log_info("init slider...\n");
+    log_info("メインデバイス初期化...\n");
     return S_OK;
 }
 
 void chuni_io_slider_start(chuni_io_slider_callback_t callback) {
-    log_info("starting slider...\n");
+    log_info("メインデバイス開始...\n");
     if (chuni_io_slider_thread != NULL) {
         return;
     }
@@ -146,7 +149,7 @@ void chuni_io_slider_start(chuni_io_slider_callback_t callback) {
 }
 
 void chuni_io_slider_stop(void) {
-    log_info("stopping slider...\n");
+    log_info("メインデバイス停止...\n");
     if (chuni_io_slider_thread == NULL) {
         return;
     }
@@ -170,8 +173,7 @@ void chuni_io_slider_set_leds(const uint8_t* rgb) {
         if (rgb[i] != prev_rgb_status[i] || rgb[i + 1] != prev_rgb_status[i + 1] || rgb[i + 2] != prev_rgb_status[i + 2]) {
             uint8_t n = i / 6;
             //log_debug("SET_LED[%d]: rgb(%d, %d, %d)\n", n, rgb[i + 1], rgb[i + 2], rgb[i]);
-            if (!remote_exist) log_warn("remote does not exist.\n");
-            else {
+            if (remote_exist) {
                 message.target = n;
                 message.led_color_r = rgb[i + 1];
                 message.led_color_g = rgb[i + 2];
